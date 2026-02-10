@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize all functions
     initNavigation();
     initScrollAnimations();
-    initTypingEffect();
+    // initTypingEffect(); // Commented out - function not in use
     initStatsCounter();
     initSmoothScrolling();
     initParticleEffect();
@@ -103,7 +103,7 @@ function initScrollAnimations() {
 }
 
 // Typing effect for hero section
-function initTypingEffect() {
+/* function initTypingEffect() {
     const roleText = document.querySelector('.role-text');
     if (!roleText) return;
 
@@ -144,15 +144,16 @@ function initTypingEffect() {
 
     // Start typing effect after a delay
     setTimeout(typeWriter, 1000);
-}
+} */
 
 // Stats counter animation
 function initStatsCounter() {
     const statNumbers = document.querySelectorAll('.stat-number');
+    let hasAnimated = false;
     
     const countUp = (element) => {
         const target = parseInt(element.getAttribute('data-target'));
-        const increment = target / 100;
+        const increment = target / 50; // Faster animation
         let current = 0;
         
         const timer = setInterval(() => {
@@ -161,24 +162,31 @@ function initStatsCounter() {
                 current = target;
                 clearInterval(timer);
             }
-            element.textContent = Math.floor(current) + (target > 50 ? '+' : '');
-        }, 20);
+            element.textContent = Math.floor(current);
+        }, 30);
     };
 
-    // Intersection Observer for stats
+    // Intersection Observer for stats with better threshold
     const statsObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const statNumber = entry.target;
-                countUp(statNumber);
-                statsObserver.unobserve(statNumber);
+            if (entry.isIntersecting && !hasAnimated) {
+                hasAnimated = true;
+                statNumbers.forEach(stat => {
+                    countUp(stat);
+                });
+                statsObserver.disconnect();
             }
         });
+    }, {
+        threshold: 0.5, // Trigger when 50% of the section is visible
+        rootMargin: '0px'
     });
 
-    statNumbers.forEach(stat => {
-        statsObserver.observe(stat);
-    });
+    // Observe the stats grid container instead of individual numbers
+    const statsGrid = document.querySelector('.stats-grid');
+    if (statsGrid) {
+        statsObserver.observe(statsGrid);
+    }
 }
 
 // Smooth scrolling for navigation links
